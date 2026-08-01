@@ -34,7 +34,7 @@
     </p>
   </header>
 
-  <!-- PRODUCT CATALOG (โซนเลือกซื้อสินค้า) -->
+  <!-- PRODUCT CATALOG -->
   <section id="store" class="max-w-6xl mx-auto px-6 py-12 w-full">
     <h2 class="text-2xl font-bold text-white mb-8 text-center sm:text-left">เลือกแพ็กพรีเซ็ตที่คุณต้องการ</h2>
 
@@ -44,7 +44,7 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-indigo-500/50 transition flex flex-col justify-between">
         <div class="p-6">
           <div class="w-full h-40 bg-slate-800 rounded-xl mb-4 flex items-center justify-center text-slate-500 font-bold border border-slate-700/50">
-            🎬 Preview Image / Video
+            🎬 Preview Image
           </div>
           <span class="text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-1 rounded-md font-semibold border border-indigo-500/20">Color Grading</span>
           <h3 class="text-lg font-bold text-white mt-2 mb-1">Cinematic Mood LUTs Pack</h3>
@@ -65,7 +65,7 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-indigo-500/50 transition flex flex-col justify-between">
         <div class="p-6">
           <div class="w-full h-40 bg-slate-800 rounded-xl mb-4 flex items-center justify-center text-slate-500 font-bold border border-slate-700/50">
-            ⚡ Preview Image / Video
+            ⚡ Preview Image
           </div>
           <span class="text-[10px] bg-purple-500/10 text-purple-400 px-2 py-1 rounded-md font-semibold border border-purple-500/20">Transitions</span>
           <h3 class="text-lg font-bold text-white mt-2 mb-1">Seamless Transitions Pack</h3>
@@ -82,12 +82,12 @@
         </div>
       </div>
 
-      <!-- CARD 3 (BUNDLE BEST SELLER) -->
+      <!-- CARD 3 (BEST SELLER) -->
       <div class="bg-gradient-to-b from-indigo-950/40 to-slate-900 border-2 border-indigo-500/60 rounded-2xl overflow-hidden shadow-xl shadow-indigo-950/50 flex flex-col justify-between relative">
         <span class="absolute top-3 right-3 bg-indigo-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">ขายดีที่สุด</span>
         <div class="p-6">
           <div class="w-full h-40 bg-indigo-900/30 rounded-xl mb-4 flex items-center justify-center text-indigo-300 font-bold border border-indigo-500/30">
-            🔥 Preview Image / Video
+            🔥 Preview Image
           </div>
           <span class="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-1 rounded-md font-semibold border border-amber-500/20">All-In-One Bundle</span>
           <h3 class="text-lg font-bold text-white mt-2 mb-1">Ultimate Creator Bundle</h3>
@@ -107,24 +107,32 @@
     </div>
   </section>
 
-  <!-- PAYMENT MODAL -->
+  <!-- PAYMENT & SLIP UPLOAD MODAL -->
   <div id="paymentModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
     <div class="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-3xl max-w-sm w-full text-center relative shadow-2xl">
       <button onclick="closeCheckout()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">✕</button>
 
       <div id="modalContainer">
-        <p class="text-[10px] text-indigo-400 font-semibold tracking-wider uppercase mb-1">PromptPay Payment</p>
+        <p class="text-[10px] text-indigo-400 font-semibold tracking-wider uppercase mb-1">PromptPay Direct Transfer</p>
         <h3 id="selectedItemTitle" class="text-base font-bold text-white mb-1">ชื่อรายการ</h3>
-        <p class="text-xs text-slate-400 mb-6">ยอดชำระ <span id="selectedItemPrice" class="text-indigo-400 font-bold text-base">0.00 บาท</span></p>
+        <p class="text-xs text-slate-400 mb-4">ยอดโอนเงิน <span id="selectedItemPrice" class="text-indigo-400 font-bold text-base">0.00 บาท</span></p>
 
-        <div class="bg-white p-4 rounded-2xl inline-block mb-6 border-2 border-indigo-500/50">
-          <img id="qrImage" src="" alt="PromptPay QR Code" class="w-48 h-48 object-contain">
+        <!-- Dynamic PromptPay QR Code -->
+        <div class="bg-white p-3 rounded-2xl inline-block mb-4 border-2 border-indigo-500/50">
+          <img id="qrImage" src="" alt="PromptPay QR Code" class="w-44 h-44 object-contain">
         </div>
 
-        <div class="flex items-center justify-center space-x-2 text-xs text-slate-400 bg-slate-800/50 py-2 px-4 rounded-full border border-slate-700/50">
-          <span class="w-2 h-2 bg-indigo-500 rounded-full animate-ping"></span>
-          <span>ระบบกำลังรอตรวจจับการโอนเงิน...</span>
+        <!-- UPLOAD SLIP FORM -->
+        <div class="text-left bg-slate-800/40 p-4 rounded-2xl border border-slate-700/50 mb-4">
+          <label class="block text-xs text-slate-300 font-semibold mb-2">แนบรูปสลิปการโอนเงินเพื่อยืนยัน:</label>
+          <input type="file" id="slipInput" accept="image/*" class="block w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer">
         </div>
+
+        <!-- VERIFY BUTTON -->
+        <button id="verifyBtn" onclick="verifySlip()" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-indigo-600/30">
+          ตรวจสอบสลิปและรับสินค้า
+        </button>
+        <p id="statusMsg" class="text-xs mt-3 text-slate-400 hidden"></p>
       </div>
     </div>
   </div>
@@ -134,58 +142,70 @@
   </footer>
 
   <script>
-    let pollInterval = null;
+    let currentPrice = 0;
 
-    // รับค่า ชื่อสินค้า และ ราคา ส่งไปหลังบ้าน
-    async function openCheckout(title, price) {
+    function openCheckout(title, price) {
+      currentPrice = price;
       document.getElementById('selectedItemTitle').innerText = title;
       document.getElementById('selectedItemPrice').innerText = price.toFixed(2) + ' บาท';
+
+      // สร้างรูป QR PromptPay อัตโนมัติจาก PromptPay ID และยอดเงิน
+      const promptpayId = '0812345678'; // เดี๋ยวเปลี่ยนเป็นเบอร์ PromptPay ของคุณใน Vercel
+      document.getElementById('qrImage').src = `https://promptpay.io/${promptpayId}/${price}.png`;
 
       const modal = document.getElementById('paymentModal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+    }
+
+    async function verifySlip() {
+      const fileInput = document.getElementById('slipInput');
+      const statusMsg = document.getElementById('statusMsg');
+      const verifyBtn = document.getElementById('verifyBtn');
+
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert('กรุณาเลือกรูปสลิปการโอนเงินก่อนครับ');
+        return;
+      }
+
+      statusMsg.classList.remove('hidden', 'text-red-400', 'text-green-400');
+      statusMsg.classList.add('text-indigo-400');
+      statusMsg.innerText = '⌛ กำลังตรวจสอบความถูกต้องของสลิป...';
+      verifyBtn.disabled = true;
+
+      const formData = new FormData();
+      formData.append('files', fileInput.files[0]);
+      formData.append('amount', currentPrice);
 
       try {
-        const res = await fetch('/api/create-qr', { 
+        const res = await fetch('/api/verify-slip', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ itemTitle: title, amount: price })
+          body: formData
         });
         const data = await res.json();
 
         if (data.success) {
-          document.getElementById('qrImage').src = data.qrImageUrl;
-          startPolling(data.orderId);
+          renderSuccessState(data.downloadUrl);
         } else {
-          alert('ไม่สามารถสร้าง QR Code ได้');
+          statusMsg.classList.remove('text-indigo-400');
+          statusMsg.classList.add('text-red-400');
+          statusMsg.innerText = '❌ ' + (data.message || 'สลิปไม่ถูกต้อง หรือยอดเงินไม่ตรง');
+          verifyBtn.disabled = false;
         }
       } catch (err) {
-        console.error(err);
+        statusMsg.classList.remove('text-indigo-400');
+        statusMsg.classList.add('text-red-400');
+        statusMsg.innerText = '❌ เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่';
+        verifyBtn.disabled = false;
       }
-    }
-
-    function startPolling(orderId) {
-      pollInterval = setInterval(async () => {
-        try {
-          const res = await fetch(`/api/check-status?orderId=${orderId}`);
-          const data = await res.json();
-
-          if (data.paid) {
-            clearInterval(pollInterval);
-            renderSuccessState(data.downloadUrl);
-          }
-        } catch (err) {
-          console.error(err);
-        }
-      }, 3000);
     }
 
     function renderSuccessState(downloadUrl) {
       document.getElementById('modalContainer').innerHTML = `
         <div class="py-4">
           <div class="w-16 h-16 bg-green-500/20 text-green-400 border border-green-500/30 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">✓</div>
-          <h3 class="text-2xl font-bold text-white mb-2">ชำระเงินสำเร็จ!</h3>
-          <p class="text-xs text-slate-400 mb-6">ขอบคุณที่สั่งซื้อ สามารถกดดาวน์โหลดไฟล์ด้านล่างได้เลยครับ</p>
+          <h3 class="text-2xl font-bold text-white mb-2">ตรวจสอบสลิปสำเร็จ!</h3>
+          <p class="text-xs text-slate-400 mb-6">ขอบคุณสำหรับการสั่งซื้อ สามารถกดดาวน์โหลดไฟล์ด้านล่างได้ทันทีครับ</p>
           <a href="${downloadUrl}" target="_blank" class="block w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl transition">
             ดาวน์โหลดไฟล์ ZIP
           </a>
@@ -194,7 +214,6 @@
     }
 
     function closeCheckout() {
-      if (pollInterval) clearInterval(pollInterval);
       document.getElementById('paymentModal').classList.add('hidden');
     }
   </script>
