@@ -40,7 +40,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       
-      <!-- CARD 1 (ID: 1 - Price: 5 THB) -->
+      <!-- CARD 1 -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-indigo-500/50 transition flex flex-col justify-between">
         <div class="p-6">
           <div class="w-full h-40 bg-slate-800 rounded-xl mb-4 flex items-center justify-center text-slate-500 font-bold border border-slate-700/50">
@@ -53,15 +53,15 @@
         <div class="p-6 pt-0 border-t border-slate-800/60 mt-auto flex justify-between items-center">
           <div>
             <p class="text-[10px] text-slate-500">ราคาพิเศษ</p>
-            <p class="text-xl font-bold text-indigo-400">5 ฿</p>
+            <p class="text-xl font-bold text-indigo-400">190 ฿</p>
           </div>
-          <button onclick="openCheckout(1, 'Cinematic Mood LUTs Pack', 5)" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition">
+          <button onclick="openCheckout(1, 'Cinematic Mood LUTs Pack', 190)" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition">
             สั่งซื้อชิ้นนี้
           </button>
         </div>
       </div>
 
-      <!-- CARD 2 (ID: 2 - Price: 10 THB) -->
+      <!-- CARD 2 -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-indigo-500/50 transition flex flex-col justify-between">
         <div class="p-6">
           <div class="w-full h-40 bg-slate-800 rounded-xl mb-4 flex items-center justify-center text-slate-500 font-bold border border-slate-700/50">
@@ -74,15 +74,15 @@
         <div class="p-6 pt-0 border-t border-slate-800/60 mt-auto flex justify-between items-center">
           <div>
             <p class="text-[10px] text-slate-500">ราคาพิเศษ</p>
-            <p class="text-xl font-bold text-purple-400">10 ฿</p>
+            <p class="text-xl font-bold text-purple-400">5 ฿</p>
           </div>
-          <button onclick="openCheckout(2, 'Seamless Transitions Pack', 10)" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold rounded-xl transition">
+          <button onclick="openCheckout(2, 'Seamless Transitions Pack', 5)" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold rounded-xl transition">
             สั่งซื้อชิ้นนี้
           </button>
         </div>
       </div> 
 
-      <!-- CARD 3 (BEST SELLER) (ID: 3 - Price: 15 THB) -->
+      <!-- CARD 3 (BEST SELLER) -->
       <div class="bg-gradient-to-b from-indigo-950/40 to-slate-900 border-2 border-indigo-500/60 rounded-2xl overflow-hidden shadow-xl shadow-indigo-950/50 flex flex-col justify-between relative">
         <span class="absolute top-3 right-3 bg-indigo-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">ขายดีที่สุด</span>
         <div class="p-6">
@@ -143,14 +143,15 @@
 
   <script>
     let currentProductId = null;
+    let currentPrice = 0; // ประกาศตัวแปรรับค่าราคาไว้ตรงนี้
 
     function openCheckout(productId, title, price) {
       currentProductId = productId;
-      
+      currentPrice = price; // จัดเก็บค่าราคาเมื่อเปิด Modal
+
       document.getElementById('selectedItemTitle').innerText = title;
       document.getElementById('selectedItemPrice').innerText = price.toFixed(2) + ' บาท';
 
-      // เบอร์พร้อมเพย์ของคุณที่ผูกไว้
       const promptpayId = '0825682348';
       document.getElementById('qrImage').src = `https://promptpay.io/${promptpayId}/${price}.png`;
 
@@ -160,51 +161,51 @@
     }
 
     async function verifySlip() {
-  const fileInput = document.getElementById('slipInput');
-  const statusMsg = document.getElementById('statusMsg');
-  const verifyBtn = document.getElementById('verifyBtn');
+      const fileInput = document.getElementById('slipInput');
+      const statusMsg = document.getElementById('statusMsg');
+      const verifyBtn = document.getElementById('verifyBtn');
 
-  if (!fileInput.files || fileInput.files.length === 0) {
-    alert('กรุณาเลือกรูปสลิปการโอนเงินก่อนครับ');
-    return;
-  }
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert('กรุณาเลือกรูปสลิปการโอนเงินก่อนครับ');
+        return;
+      }
 
-  statusMsg.classList.remove('hidden', 'text-red-400', 'text-green-400');
-  statusMsg.classList.add('text-indigo-400');
-  statusMsg.innerText = '⌛ กำลังตรวจสอบความถูกต้องของสลิป...';
-  verifyBtn.disabled = true;
+      statusMsg.classList.remove('hidden', 'text-red-400', 'text-green-400');
+      statusMsg.classList.add('text-indigo-400');
+      statusMsg.innerText = '⌛ กำลังตรวจสอบความถูกต้องของสลิป...';
+      verifyBtn.disabled = true;
 
-  const selectedFile = fileInput.files[0];
-  const formData = new FormData();
+      const selectedFile = fileInput.files[0];
+      const formData = new FormData();
 
-  // ส่งครอบคลุมทุกชื่อ Key ที่หลังบ้านอาจจะเรียกใช้
-  formData.append('files', selectedFile);
-  formData.append('file', selectedFile);
-  formData.append('productId', currentProductId);
-  formData.append('amount', currentPrice);
+      // ส่งครอบคลุมทุก Key ที่หลังบ้านอาจจะรอรับ
+      formData.append('files', selectedFile);
+      formData.append('file', selectedFile);
+      formData.append('productId', currentProductId);
+      formData.append('amount', currentPrice);
 
-  try {
-    const res = await fetch('/api/verify-slip', {
-      method: 'POST',
-      body: formData
-    });
-    const data = await res.json();
+      try {
+        const res = await fetch('/api/verify-slip', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
 
-    if (data.success) {
-      renderSuccessState(data.downloadUrl);
-    } else {
-      statusMsg.classList.remove('text-indigo-400');
-      statusMsg.classList.add('text-red-400');
-      statusMsg.innerText = '❌ ' + (data.message || 'สลิปไม่ถูกต้อง หรือยอดเงินไม่ตรง');
-      verifyBtn.disabled = false;
+        if (data.success) {
+          renderSuccessState(data.downloadUrl);
+        } else {
+          statusMsg.classList.remove('text-indigo-400');
+          statusMsg.classList.add('text-red-400');
+          statusMsg.innerText = '❌ ' + (data.message || 'สลิปไม่ถูกต้อง หรือยอดเงินไม่ตรง');
+          verifyBtn.disabled = false;
+        }
+      } catch (err) {
+        statusMsg.classList.remove('text-indigo-400');
+        statusMsg.classList.add('text-red-400');
+        statusMsg.innerText = '❌ เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่';
+        verifyBtn.disabled = false;
+      }
     }
-  } catch (err) {
-    statusMsg.classList.remove('text-indigo-400');
-    statusMsg.classList.add('text-red-400');
-    statusMsg.innerText = '❌ เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่';
-    verifyBtn.disabled = false;
-  }
-}
 
     function renderSuccessState(downloadUrl) {
       document.getElementById('modalContainer').innerHTML = `
