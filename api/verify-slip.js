@@ -19,7 +19,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. แปลง form.parse เป็น Promise เพื่อรองรับ Vercel Serverless
     const form = formidable({});
     const { fields, files } = await new Promise((resolve, reject) => {
       form.parse(req, (err, fields, files) => {
@@ -28,7 +27,6 @@ export default async function handler(req, res) {
       });
     });
 
-    // 2. ดึงค่าแบบยืดหยุ่น (รองรับทั้ง file และ files)
     const rawProductId = fields.productId;
     const productId = Array.isArray(rawProductId) ? rawProductId[0] : rawProductId;
 
@@ -39,7 +37,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, message: 'กรุณาเลือกสินค้าและแนบไฟล์สลิปให้ถูกต้อง' });
     }
 
-    // 3. ดึงข้อมูลสินค้าจากตาราง products ใน Supabase
+    // 1. ดึงข้อมูลสินค้าจาก Supabase
     const { data: product, error: productError } = await supabaseAdmin
       .from('products')
       .select('*')
@@ -50,16 +48,18 @@ export default async function handler(req, res) {
       return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลสินค้าที่ระบุ' });
     }
 
-    // 4. ส่งไฟล์สลิปไปตรวจกับ SlipOK API
+    // 2. อ่านไฟล์สลิป และระบุ MIME Type ให้ชัดเจน
     const filePath = slipFile.filepath || slipFile.path;
     const fileBuffer = fs.readFileSync(filePath);
-    const fileBlob = new Blob([fileBuffer]);
+    const mimeType = slipFile.mimetype || slipFile.type || 'image/jpeg';
+    const fileBlob = new Blob([fileBuffer], { type: mimeType });
+
     const slipokFormData = new FormData();
     slipokFormData.append('files', fileBlob, slipFile.originalFilename || slipFile.name || 'slip.jpg');
 
-    // ใช้ Branch ID สำหรับ Path URL และใช้ API Key สำหรับ Header
     const branchId = process.env.SLIPOK_BRANCH_ID || process.env.SLIPOK_API_KEY;
 
+    // 3. ยิงตรวจสอบไปยัง SlipOK API
     const slipokRes = await fetch(
       `https://api.slipok.com/api/line/apikey/${branchId}`,
       {
@@ -72,15 +72,16 @@ export default async function handler(req, res) {
     );
 
     const slipData = await slipokRes.json();
+    console.log('SlipOK Response:', JSON.stringify(slipData)); // บันทึก Log ดูใน Vercel
 
     if (!slipokRes.ok || !slipData.success) {
       return res.status(400).json({
         success: false,
-        message: slipData.message || 'สลิปไม่ถูกต้อง หรือถูกใช้งานไปแล้ว',
+        message: slipData.data?.message || slipData.message || 'สลิปไม่ถูกต้อง หรือถูกใช้งานไปแล้ว',
       });
     }
 
-    // 5. ตรวจสอบยอดเงินโอน
+    // 4. ตรวจสอบยอดเงินโอน
     const paidAmount = Number(slipData.data?.amount || 0);
     const expectedPrice = Number(product.price);
 
@@ -91,7 +92,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // 6. ออก Signed URL หมดอายุใน 1 ชั่วโมง
+    // 5. ออก Signed URL สำหรับดาวน์โหลดไฟล์ ZIP
     const bucketName = process.env.SUPABASE_BUCKET_NAME || 'digital-products-presets';
     const { data: urlData, error: urlError } = await supabaseAdmin.storage
       .from(bucketName)
@@ -109,6 +110,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
+    console.error('Verify Slip Error:', error);
     return res.status(500).json({ success: false, message: error.message || 'เกิดข้อผิดพลาดในการประมวลผล' });
   }
 }
