@@ -1,9 +1,10 @@
 {
   "name": "preset-store",
   "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "@supabase/supabase-js": "^2.48.0",
-    "formidable": "^3.5.2"
+  "scripts": {
+    "build": "tailwindcss -i ./styles/input.css -o ./output.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
   }
 }
