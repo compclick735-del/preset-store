@@ -8,11 +8,16 @@ export const config = {
   },
 };
 
+// ตรวจสอบ Environment Variables ของ Supabase
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('❌ [SUPABASE ERROR] ขาด SUPABASE_URL หรือ SUPABASE_SERVICE_ROLE_KEY ใน Environment Variables');
+}
+
 // สร้าง Supabase Admin Client
-const supabaseAdmin = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -20,16 +25,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. ตรวจสอบ Environment Variables ที่จำเป็น
+    // 1. ตรวจสอบ Environment Variables ของ SlipOK
     const apiKey = process.env.SLIPOK_API_KEY;
     const branchId = process.env.SLIPOK_BRANCH_ID || apiKey;
 
     if (!apiKey) {
-      console.error('Missing SLIPOK_API_KEY in Environment Variables');
+      console.error('❌ Missing SLIPOK_API_KEY in Environment Variables');
       return res.status(500).json({ success: false, message: 'ระบบหลังบ้านยังไม่ได้ตั้งค่า SLIPOK_API_KEY' });
     }
 
-    // 2. Parse Form Data (ใช้ Promise เพื่อรองรับ Vercel Serverless Function)
+    // 2. Parse Form Data
     const form = formidable({});
     const { fields, files } = await new Promise((resolve, reject) => {
       form.parse(req, (err, fields, files) => {
@@ -58,7 +63,7 @@ export default async function handler(req, res) {
       .single();
 
     if (productError || !product) {
-      console.error('Supabase Product Fetch Error:', productError);
+      console.error('❌ Supabase Product Fetch Error:', productError);
       return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลสินค้าที่ระบุในระบบ' });
     }
 
@@ -86,7 +91,7 @@ export default async function handler(req, res) {
     );
 
     const slipData = await slipokRes.json();
-    console.log('SlipOK Response Log:', JSON.stringify(slipData));
+    console.log('✅ SlipOK Response Log:', JSON.stringify(slipData));
 
     if (!slipokRes.ok || !slipData.success) {
       return res.status(400).json({
@@ -107,14 +112,25 @@ export default async function handler(req, res) {
     }
 
     // 7. ออก Signed URL สำหรับดาวน์โหลดไฟล์ ZIP จาก Supabase Storage (หมดอายุใน 1 ชั่วโมง)
-    const bucketName = process.env.SUPABASE_BUCKET_NAME || 'digital-products-presets';
+    const bucketName = (process.env.SUPABASE_BUCKET_NAME || 'digital-products-presets').trim();
+    
+    // ทำความสะอาด file_path (ลบช่องว่างหัว-ท้าย และลบ / นำหน้าออก)
+    const cleanFilePath = (product.file_path || '').trim().replace(/^\/+/, '');
+
+    console.log(`🔍 [STORAGE DEBUG] Bucket Name: "${bucketName}"`);
+    console.log(`🔍 [STORAGE DEBUG] DB Raw Path: "${product.file_path}"`);
+    console.log(`🔍 [STORAGE DEBUG] Cleaned Path: "${cleanFilePath}"`);
+
     const { data: urlData, error: urlError } = await supabaseAdmin.storage
       .from(bucketName)
-      .createSignedUrl(product.file_path, 3600);
+      .createSignedUrl(cleanFilePath, 3600);
 
     if (urlError || !urlData?.signedUrl) {
-      console.error('Supabase Signed URL Error:', urlError);
-      return res.status(500).json({ success: false, message: 'ไม่สามารถสร้างลิงก์ดาวน์โหลดสินค้าได้' });
+      console.error('❌ Supabase Signed URL Error:', urlError);
+      return res.status(500).json({ 
+        success: false, 
+        message: `ไม่สามารถสร้างลิงก์ดาวน์โหลดสินค้าได้ (${urlError?.message || 'Object not found'})` 
+      });
     }
 
     // 8. ส่งผลลัพธ์กลับไปยังหน้าบ้าน
@@ -126,7 +142,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Verify Slip Server Error:', error);
+    console.error('❌ Verify Slip Server Error:', error);
     return res.status(500).json({
       success: false,
       message: error.message || 'เกิดข้อผิดพลาดในการประมวลผลระบบหลังบ้าน',
