@@ -6,7 +6,8 @@
     "build": "tailwindcss -i ./public/input.css -o ./public/output.css"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0"
+    "@supabase/supabase-js": "^2.39.0",
+    "formidable": "^3.5.1"
   },
   "devDependencies": {
     "tailwindcss": "^3.4.0"
