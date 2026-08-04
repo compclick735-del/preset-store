@@ -160,51 +160,51 @@
     }
 
     async function verifySlip() {
-      const fileInput = document.getElementById('slipInput');
-      const statusMsg = document.getElementById('statusMsg');
-      const verifyBtn = document.getElementById('verifyBtn');
+  const fileInput = document.getElementById('slipInput');
+  const statusMsg = document.getElementById('statusMsg');
+  const verifyBtn = document.getElementById('verifyBtn');
 
-      if (!fileInput.files || fileInput.files.length === 0) {
-        alert('กรุณาเลือกรูปสลิปการโอนเงินก่อนครับ');
-        return;
-      }
+  if (!fileInput.files || fileInput.files.length === 0) {
+    alert('กรุณาเลือกรูปสลิปการโอนเงินก่อนครับ');
+    return;
+  }
 
-      if (!currentProductId) {
-        alert('ไม่พบรหัสสินค้า กรุณาปิดหน้าต่างนี้แล้วเลือกสินค้าใหม่อีกครั้ง');
-        return;
-      }
+  statusMsg.classList.remove('hidden', 'text-red-400', 'text-green-400');
+  statusMsg.classList.add('text-indigo-400');
+  statusMsg.innerText = '⌛ กำลังตรวจสอบความถูกต้องของสลิป...';
+  verifyBtn.disabled = true;
 
-      statusMsg.classList.remove('hidden', 'text-red-400', 'text-green-400');
-      statusMsg.classList.add('text-indigo-400');
-      statusMsg.innerText = '⌛ กำลังตรวจสอบความถูกต้องของสลิป...';
-      verifyBtn.disabled = true;
+  const selectedFile = fileInput.files[0];
+  const formData = new FormData();
 
-      const formData = new FormData();
-      formData.append('files', fileInput.files[0]);
-      formData.append('productId', currentProductId); // ส่ง productId ไปให้ Serverless Function
+  // ส่งครอบคลุมทุกชื่อ Key ที่หลังบ้านอาจจะเรียกใช้
+  formData.append('files', selectedFile);
+  formData.append('file', selectedFile);
+  formData.append('productId', currentProductId);
+  formData.append('amount', currentPrice);
 
-      try {
-        const res = await fetch('/api/verify-slip', {
-          method: 'POST',
-          body: formData
-        });
-        const data = await res.json();
+  try {
+    const res = await fetch('/api/verify-slip', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
 
-        if (data.success) {
-          renderSuccessState(data.downloadUrl);
-        } else {
-          statusMsg.classList.remove('text-indigo-400');
-          statusMsg.classList.add('text-red-400');
-          statusMsg.innerText = '❌ ' + (data.message || 'สลิปไม่ถูกต้อง หรือยอดเงินไม่ตรง');
-          verifyBtn.disabled = false;
-        }
-      } catch (err) {
-        statusMsg.classList.remove('text-indigo-400');
-        statusMsg.classList.add('text-red-400');
-        statusMsg.innerText = '❌ เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่';
-        verifyBtn.disabled = false;
-      }
+    if (data.success) {
+      renderSuccessState(data.downloadUrl);
+    } else {
+      statusMsg.classList.remove('text-indigo-400');
+      statusMsg.classList.add('text-red-400');
+      statusMsg.innerText = '❌ ' + (data.message || 'สลิปไม่ถูกต้อง หรือยอดเงินไม่ตรง');
+      verifyBtn.disabled = false;
     }
+  } catch (err) {
+    statusMsg.classList.remove('text-indigo-400');
+    statusMsg.classList.add('text-red-400');
+    statusMsg.innerText = '❌ เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่';
+    verifyBtn.disabled = false;
+  }
+}
 
     function renderSuccessState(downloadUrl) {
       document.getElementById('modalContainer').innerHTML = `
